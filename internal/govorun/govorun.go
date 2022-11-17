@@ -23,34 +23,35 @@ func Init(msg string) *Govorun {
 	}
 }
 
-func (m *Govorun) Start() {
+func (gov *Govorun) Start() {
 	tick := time.Tick(1 * time.Second)
+	go gov.startServer()
 	log.Print("govorun was started")
 
 	for range tick {
-		for _, ch := range m.ch {
+		for _, ch := range gov.ch {
 			if ch != nil {
-				ch <- m.message
+				ch <- gov.message
 			}
 		}
 	}
 }
 
-func (m *Govorun) Subscribe(name string, ch chan string) func() {
-	m.ch[name] = ch
+func (gov *Govorun) Subscribe(name string, ch chan string) func() {
+	gov.ch[name] = ch
 	log.Printf("govorun: channel %s was subscribe", name)
 
 	return func() {
-		m.Unsubscribe(name)
+		gov.Unsubscribe(name)
 	}
 }
 
-func (m *Govorun) Unsubscribe(name string) {
+func (gov *Govorun) Unsubscribe(name string) {
 	log.Printf("govorun: channel %s was unsubscribe", name)
-	delete(m.ch, name)
+	delete(gov.ch, name)
 }
 
-func (m *Govorun) UpdateMessage(msg string) {
+func (gov *Govorun) UpdateMessage(msg string) {
 	log.Printf("govorun: message was changed (%s)", msg)
-	m.message = msg
+	gov.message = msg
 }
